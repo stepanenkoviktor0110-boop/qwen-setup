@@ -7,113 +7,94 @@ Technical architecture overview for AI agents. Helps agents understand HOW the s
 
 ## Tech Stack
 
-**Frontend:** [Framework/Library - e.g., "React 18 with Vite"]
-- **Why:** [One reason - e.g., "Fast dev experience with HMR, widely supported"]
+**Runtime:** Bash scripts (macOS) + Python 3 (Agent Cleaner)
+- **Why:** Native on macOS, no extra dependencies for shell scripts. Python for process management (psutil).
 
-**Backend:** [Framework - e.g., "Express.js" / "FastAPI" / "None - static site"]
-- **Why:** [One reason - e.g., "Minimal overhead for REST API, large ecosystem"]
+**CLI tool:** Qwen Code (`@qwen-code/qwen-code` npm package, CLI binary: `qwen`)
+- **Why:** Free AI coding agent with 1000+ requests/day, open-source, Claude Code-compatible feature set.
+- **Install methods:** npm, Homebrew (`brew install qwen-code`), or quick install script.
 
-**Database:** [Database type - e.g., "PostgreSQL" / "MongoDB" / "None"]
-- **Why:** [One reason - e.g., "ACID transactions needed for payments" / "N/A"]
+**Node.js:** v20+ (required by Qwen Code)
+- **Why:** Qwen Code runtime dependency.
 
-<!-- Add other stack components if needed: Mobile, Desktop, etc -->
+**Key Qwen Code paths:**
+- Global config: `~/.qwen/` (analogous to `~/.claude/`)
+- Project config: `.qwen/` (analogous to `.claude/`)
+- Instructions file: `QWEN.md` (analogous to `CLAUDE.md`)
+- Settings: `~/.qwen/settings.json`
+- Skills: `~/.qwen/skills/<name>/SKILL.md`
+- Commands: `~/.qwen/commands/<name>.md`
+- Agents: `.qwen/agents/<name>.md`
+
+**Tool name mapping (Claude Code → Qwen Code):**
+- `Bash` → `run_shell_command`
+- `Read` → `read_file`
+- `Write` → `write_file`
+- `Edit` → `edit`
+- `Glob` → `glob`
+- `Grep` → `grep_search`
+
+**Database:** None
 
 ---
 
 ## Project Structure
 
-[Brief map of where things live - helps agents find relevant code quickly]
+**docs/** — numbered step-by-step guides (01-installation through 07-skill-master), ordered by setup sequence. Each guide is self-contained but follows the sequence in docs/README.md.
 
-```
-/
-├── src/
-│   ├── components/     [UI components]
-│   ├── api/           [API routes/endpoints]
-│   ├── utils/         [Helper functions]
-│   ├── config/        [Configuration files]
-│   └── types/         [TypeScript types/interfaces]
-├── tests/             [Test files]
-└── .claude/           [AI agent context]
-```
+**scripts/** — automation: `setup-qwen.sh` (full setup), `agent_cleaner.py` (process cleanup daemon), `install-hooks.sh` (security hooks installer).
 
-[Adjust structure to match your project - keep it simple]
+**configs/** — reference configurations: `settings.json` (Qwen settings with hooks and permissions), `hooks/block-dangerous.sh` (PreToolUse hook script), `com.user.agentcleaner.plist` (launchd service definition).
+
+**skills/** — methodology skills adapted for Qwen Code: methodology, quick-learning, skill-master. Each has a SKILL.md with YAML frontmatter.
 
 ---
 
 ## Key Dependencies
 
-[List ONLY critical packages that agents need to know about - not every dependency]
-
 **Critical packages:**
-- `[package-name]` - [Why we use it - e.g., "Authentication - handles JWT tokens"]
-- `[package-name]` - [Why we use it - e.g., "Stripe SDK - payment processing"]
-- `[package-name]` - [Why we use it - e.g., "Zod - runtime validation for API inputs"]
+- `@qwen-code/qwen-code` - The CLI agent itself (npm)
+- `psutil` - Python library for process monitoring (Agent Cleaner)
+- `node` v20+ - Runtime for Qwen Code
 
-<!-- Add 3-5 most important dependencies. Skip obvious ones like React, Express basics -->
+No other external dependencies. All scripts use built-in macOS tools (bash, launchctl, pkill).
 
 ---
 
 ## External Integrations
 
-[Third-party services/APIs this project connects to]
+**Qwen Code API (Alibaba Cloud)**
+- **Purpose:** AI model backend for Qwen Code CLI
+- **Auth method:** OAuth via browser (Google or GitHub login), handled by Qwen Code automatically
 
-**[Service name - e.g., "Stripe"]**
-- **Purpose:** [What we use it for - e.g., "Payment processing for subscriptions"]
-- **Auth method:** [How we authenticate - e.g., "API key in STRIPE_SECRET_KEY env var"]
-
-<!-- If no external integrations, write: "None - no external API dependencies" -->
+No other external API dependencies.
 
 ---
 
 ## Data Flow
 
-[Describe in 2-4 sentences how data moves through the system. Focus on the main flow, not edge cases.]
-
-<!-- Example: "User submits form → Frontend validates with Zod → POST to /api/users → Backend validates again → Save to PostgreSQL → Return user object → Update UI." -->
+User runs `setup-qwen.sh` → script installs Node.js (if missing), installs Qwen Code via npm, runs profiling questions and writes answers to `~/.qwen/QWEN.md`, copies security hooks to `~/.qwen/settings.json`, installs Agent Cleaner as launchd service, copies methodology skills to `~/.qwen/skills/`. After setup, Qwen Code reads QWEN.md on every session start, hooks intercept dangerous commands before execution, and Agent Cleaner runs independently in background.
 
 ---
 
 ## Data Model
 
-<!--
-This section describes database/storage architecture.
-SCALING HINT: If this section grows beyond ~80 lines, extract to a separate references/database.md and link from here.
--->
+**Database:** Not applicable
 
-**Database:** [Type - e.g., "PostgreSQL 15" / "MongoDB" / "Not applicable"]
+### Persistent Files
 
-### Main Tables/Collections
+**`~/.qwen/QWEN.md`**
+- Purpose: Global agent instructions + user profile
+- Key sections: user role, experience, goals, communication preferences, language
 
-[List key tables/collections and their relationships - keep it brief]
+**`~/.qwen/settings.json`**
+- Purpose: Hooks configuration, MCP servers, approval mode
+- Key sections: hooks (PreToolUse block-dangerous), permissions
 
-**[table_name or CollectionName]**
-- Purpose: [What this stores - e.g., "User accounts and profiles"]
-- Key fields: [List 3-5 most important fields]
-- Relationships: [Links to other tables - e.g., "users.id → orders.user_id"]
-
-<!-- Add main tables. Skip junction/helper tables unless critical -->
-
-### Key Constraints
-
-[Only constraints that would cause errors if violated]
-
-- **Unique constraints:** [e.g., "users.email must be unique"]
-- **Foreign keys:** [e.g., "orders.user_id → users.id (ON DELETE CASCADE)"]
-- **Required fields:** [e.g., "users: email, password_hash are NOT NULL"]
-
-### Migration Strategy
-
-**Tool:** [e.g., "Prisma Migrate" / "Alembic" / "Django migrations" / "Manual SQL scripts"]
-
-**Process:** [Brief - e.g., "Run `npm run migrate` before deploy. Migrations in /prisma/migrations/. Never edit old migrations."]
+**`~/Library/LaunchAgents/com.user.agentcleaner.plist`**
+- Purpose: launchd service definition for Agent Cleaner
+- Auto-starts on login, runs agent_cleaner.py in background
 
 ### Sensitive Data
 
-[Fields containing PII or secrets - important for security]
-
-**PII fields:**
-- [table.field - e.g., "users.email"]
-- [table.field - e.g., "users.phone_number"]
-
-<!-- If no sensitive data, write "No PII stored" -->
-<!-- If using alternative storage (localStorage, file system, Chrome Storage API), describe it here instead of tables -->
+No PII stored. User profile in QWEN.md contains only role/preferences, no personal identifiers.

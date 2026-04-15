@@ -1,13 +1,15 @@
-# Project: [PROJECT NAME]
+# Project: Настройка QWEN (qwen-setup)
 
-> **[ONE SENTENCE - WHAT THIS PROJECT IS ABOUT]**
+> Step-by-step guide and automation scripts for setting up Qwen Code CLI on macOS with security, process cleanup, and AI development methodology.
 
 ---
 
 ## How This Project Works
 
-**Context:** All project knowledge is in `.claude/skills/project-knowledge/` skill with guides for architecture, patterns, and deployment (+ optional UX guidelines and domain-specific files).
+**Context:** All project knowledge is in `.claude/skills/project-knowledge/` — architecture, patterns, deployment.
 
 **Default branch:** `dev`
 
-**Library Documentation:** Always use context7 when you need code generation, setup or configuration steps, or library/API documentation. This means you should automatically use the Context7 MCP tools to resolve library id and get library docs without user having to explicitly ask.
+**Content language:** Guides and user-facing text in Russian. Code, commands, configs in English.
+
+**Target audience:** Mixed — beginners to intermediate. Non-technical users who want to use AI agents for building bots, websites, apps, analytics, automation.

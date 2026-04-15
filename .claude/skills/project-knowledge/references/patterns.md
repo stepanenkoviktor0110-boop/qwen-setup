@@ -1,112 +1,70 @@
 # Patterns & Conventions
 
 Coding conventions, development workflow, and project-specific practices.
-For universal coding standards, see `~/.claude/skills/code-writing/references/universal-patterns.md`.
 
 ---
 
-## Project-Specific Code Patterns
+## Project-Specific Patterns
 
-<!--
-ADD PROJECT-SPECIFIC PATTERNS HERE:
+### Documentation Style
 
-1. Framework conventions (React hooks, Django patterns, FastAPI dependencies, etc.)
-2. Domain naming (Order/Cart/Product vs Purchase/Basket/Item)
-3. External integration patterns (Stripe webhooks, API retry logic, etc.)
-4. Database patterns (transactions, query optimization, caching)
+All user-facing guides (docs/) are written in Russian for a mixed audience (beginners to intermediate). Technical terms, commands, and code stay in English with Russian explanations.
 
-Only add patterns SPECIFIC to this project. Don't add generic advice.
-Empty section is fine for simple projects.
--->
+Each guide follows a progressive complexity pattern: start simple, add depth gradually. Every step includes a verification command or expected result so the user knows it worked.
+
+### Script Style
+
+Shell scripts (bash) target macOS. Use `#!/bin/bash` shebang. Include `set -euo pipefail` for safety. Print colored status messages for each step. Check prerequisites before acting.
+
+Python scripts use standard library + psutil only. No frameworks, no virtual environments — keep it simple for non-technical users.
+
+### Configuration Format
+
+All Qwen Code configs use JSON (settings.json). Hook scripts are bash. Skill definitions are Markdown with YAML frontmatter.
+
+Settings.json in Qwen Code is structured by sections: `general`, `model`, `tools`, `permissions`, `security`, `hooks`, `mcpServers`, `env`.
 
 ---
 
 ## Git Workflow
 
-<!--
-SCALING HINT: If this section grows beyond ~80 lines, extract to references/git-workflow.md.
--->
-
 ### Branch Structure
 
-- **`main`** - Production-ready code (protected). Only merge from `dev` after full testing. Triggers production deployment.
-- **`dev`** - Active development. Integration branch for all work. Triggers staging deployment.
-- **`feature/XXX-name`** - For complex features (optional). Created from `dev`, merged back via PR, deleted after merge.
+- **`master`** - Stable documentation and scripts. Protected.
+- **`dev`** - Active work. All changes go here first, merge to master when verified.
 
 ### Branch Decision Criteria
 
-**Direct to `dev`:** Bug fixes, single file changes, simple improvements, docs, config changes, no breaking changes.
+**Direct to `dev`:** Typo fixes, single-file doc updates, config tweaks.
 
-**Feature branch:** New features, multiple files affected, breaking changes, new dependencies, external integrations, DB schema changes, architecture changes.
-
-Rule of thumb: If unsure → use feature branch (safer).
+**Feature branch:** New guide sections, new scripts, structural changes to multiple files.
 
 ### Testing Requirements
 
-- **On commit:** Code changed → Unit + Integration tests. Docs only → Skip tests.
-- **On merge to dev:** Unit + Integration (auto). E2E (optional).
-- **On merge to main:** Unit + Integration (auto). E2E (strongly recommended).
+- **On commit:** Manual verification — run scripts on a clean macOS environment (or VM) and confirm each step works.
+- **On merge to master:** Full walkthrough of the setup sequence from scratch.
 
 ### Security & Quality Gates
 
-- **Pre-commit:** Gitleaks scans for secrets (API keys, tokens, credentials). Commit blocked if detected.
-- **Pre-push:** Code review agent validates changes. All checks must pass.
+- **Pre-commit:** No secrets in committed files. `.gitignore` covers `.env`, `*.key`, `*.pem`.
+- **Review:** Documentation accuracy — all commands and paths verified against Qwen Code v0.14+.
 
 ---
 
 ## Testing & Verification
 
-<!--
-SCALING HINT: If this section grows beyond ~60 lines, extract to references/testing.md.
-This section stores proven verification approaches discovered during development.
-Generic testing methodology lives in ~/.claude/skills/test-master/.
--->
-
 ### Test Infrastructure
 
-[How to run tests: framework, runner, test DB setup, environment requirements.]
+No automated test suite. Verification is manual: run the setup script on a clean macOS installation and confirm each step completes successfully.
 
 ### Agent Verification Methods
 
-[Proven methods for agent to verify features. Updated as new methods are discovered.]
+**Shell script output:** Run `setup-qwen.sh` and check exit code + status messages.
 
-<!-- Example:
-### Telegram Bot
-**Method:** Telegram MCP
-**Setup:** Bot must be running, test user configured
-**Discovered:** 2026-01-15, during messaging feature
--->
+**Agent Cleaner:** Check `launchctl list | grep agentcleaner` and verify log file creation.
+
+**Hooks:** Run `qwen` in a test directory, attempt a blocked command (e.g., `rm -rf /`), verify it's blocked.
 
 ### User Verification Methods
 
-[Methods that require user involvement.]
-
-<!-- Example:
-### Visual UI Check
-**What to check:** Layout renders correctly on mobile
-**How:** Open on phone, verify responsive layout
-**Why agent can't:** No visual rendering capability
--->
-
----
-
-## Business Rules
-
-<!--
-SCALING HINT: If this section grows beyond ~60 lines, extract to references/business-rules.md.
-DELETE THIS SECTION if project has no complex domain logic (simple CRUD, CLI tool, utility).
-
-Use for: multi-step workflows, state machines, calculation formulas, domain constraints.
--->
-
-<!-- Example:
-### Order Lifecycle
-pending → paid → shipped → delivered
-- Cancel: only if pending or paid
-- Refund: full if pending, partial if paid, none after shipped
-
-### Pricing
-final_price = (subtotal - discount) * (1 + tax_rate) + shipping
-- Discount applies BEFORE tax
-- Free shipping if subtotal > $50
--->
+**Full setup walkthrough:** Follow all guides in sequence on a real Mac. Confirm Qwen Code starts, hooks block dangerous commands, Agent Cleaner runs in background.

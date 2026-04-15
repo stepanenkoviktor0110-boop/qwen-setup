@@ -1,111 +1,85 @@
 # Deployment & Operations
 
 ## Purpose
-Deployment process, infrastructure, and production operations for AI agents.
+Deployment process and distribution for AI agents.
 
 ---
 
 ## Deployment Platform
 
-**Platform:** [Where it deploys - e.g., "Vercel" / "Railway" / "AWS EC2" / "VPS"]
+**Platform:** GitHub repository (public or private)
 
-**Type:** [e.g., "Serverless" / "Container (Docker)" / "Static hosting" / "Browser extension"]
+**Type:** Documentation + scripts distribution (no server, no hosting)
 
-**Why this platform:** [One reason - e.g., "Free tier covers our needs" / "Need full server control"]
+**Why this platform:** Users clone the repo and run the setup script locally. No infrastructure needed.
 
 ---
 
 ## Access Information
 
-**SSH Access:**
-- Production: `ssh user@server-ip` [e.g., `ssh root@123.45.67.89`]
-- Staging: [if applicable]
+**SSH Access:** Not applicable — no server deployment.
 
-> If not configured, agent will request: server address, username, and port.
-
-**Credentials location:** [e.g., "GitHub Actions secrets" / "1Password vault"]
+**Repository:** https://github.com/stepanenkoviktor0110-boop/qwen-setup
 
 ---
 
 ## Environment Variables
 
-**See:** [.env.example](../../.env.example) in project root
+No environment variables required for the project itself.
 
-[List all required environment variables with their purpose - NO VALUES]
-
-<!-- Keep .env.example updated. Comment each variable's purpose in that file. -->
+Qwen Code uses `DASHSCOPE_API_KEY` (if using API key auth) or OAuth (browser login). These are configured during setup, not stored in this repo.
 
 ---
 
 ## Deployment Triggers
 
-**Production:** [e.g., "Auto-deploy on push to `main` after tests pass"]
+**Distribution:** Manual — user clones repo and runs setup script.
 
-**Staging:** [e.g., "Auto-deploy on push to `dev`"]
-
-**Preview:** [e.g., "Auto-deploy for every PR" / "Not configured"]
+**Updates:** Push to `master` branch. Users pull latest and re-run setup script.
 
 ---
 
 ## Pre-Deploy Checklist
 
-[Only critical manual steps - if fully automated, write "Fully automated via CI"]
-
-- [ ] [e.g., "Run `npm run migrate:prod` if schema changed"]
-- [ ] [e.g., "Verify env vars set in platform dashboard"]
+- [ ] All scripts tested on clean macOS
+- [ ] All paths and commands verified against current Qwen Code version
+- [ ] No secrets or personal data in committed files
+- [ ] README.md sequence matches actual guide order
 
 ---
 
 ## Rollback Procedure
 
-**Platform rollback:** [e.g., "Vercel: 'Redeploy' on previous deployment" / "VPS: `git checkout <prev-commit>`"]
+**User rollback:** Re-run setup script — it's idempotent (checks existing state before acting).
 
-**Manual steps if needed:** [e.g., "If DB migration broke: run rollback SQL from /migrations/rollbacks/"]
+**Qwen Code uninstall:** `npm uninstall -g @qwen-code/qwen-code`
 
-**Approximate time:** [e.g., "~2 minutes" / "~10 minutes with DB rollback"]
+**Agent Cleaner removal:** `launchctl unload ~/Library/LaunchAgents/com.user.agentcleaner.plist`
 
 ---
 
 ## Environments
 
-**Production:** [URL] - Deploys from `main` branch
+**Production:** GitHub repo `master` branch — stable, verified guides and scripts.
 
-**Staging:** [URL] - Deploys from `dev` branch
-
-<!-- If single environment, only list Production -->
+**Development:** `dev` branch — work in progress.
 
 ---
 
 ## Monitoring & Observability
 
-<!--
-SCALING HINT: If this section grows beyond ~80 lines, extract to references/monitoring.md.
-If no monitoring configured, write: "Logs output to stdout only. No error tracking configured."
--->
-
 ### Logging
 
-**Where:** [e.g., "stdout (Docker logs)" / "CloudWatch" / "Local files"]
-**Format:** [e.g., "JSON structured" / "Plain text" / "Default framework logging"]
+**Agent Cleaner log:** `~/agent_cleaner.log` — records what processes were killed and when.
+
+**Qwen Code logs:** Built-in, accessible via `--debug` flag.
 
 ### Error Tracking
 
-**Tool:** [e.g., "Sentry" / "Rollbar" / "None"]
-**Config:** [e.g., "SENTRY_DSN in .env" / "Not configured"]
+**Tool:** None — local scripts, no error aggregation.
 
 ### Health Checks
 
-**Endpoint:** [e.g., "GET /health" / "None"]
-**Checks:** [e.g., "DB connectivity, external API status" / "N/A"]
+**Agent Cleaner:** `launchctl list | grep agentcleaner` — check if running.
 
-<!-- Optional sections below — delete if not applicable -->
-
-### Metrics
-
-**Analytics:** [e.g., "Google Analytics" / "Vercel Analytics" / "None"]
-**Key metrics:** [e.g., "API response time, error rate" / "N/A"]
-
-### Alerts
-
-**Tool:** [e.g., "Sentry email alerts" / "PagerDuty" / "None"]
-**Rules:** [e.g., "Error rate > 5%" / "N/A"]
+**Hooks:** Attempt a blocked command in Qwen Code session — should see block message.

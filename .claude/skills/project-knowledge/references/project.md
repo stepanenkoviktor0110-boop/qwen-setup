@@ -7,53 +7,47 @@ This file provides high-level project overview for AI agents. Helps agents under
 
 ## Project Overview
 
-**Name:** [Project Name]
+**Name:** Настройка QWEN (qwen-setup)
 
-**Description:** [One-line description of what this project does]
+**Description:** Step-by-step guide and automation scripts for setting up Qwen Code CLI on macOS — from installation to a fully configured development environment with security, process cleanup, and AI development methodology.
 
-[Optional: 1-2 additional sentences with key context]
+The project packages the author's Claude Code methodology (quick-learning, skill-master) into portable scripts and configs that work with Qwen Code CLI.
 
 ---
 
 ## Target Audience
 
-**Primary users:** [Who uses this - e.g., "Developers building CLI tools", "Small business owners"]
+**Primary users:** Developers and tech-savvy users who want to use Qwen Code CLI as their AI coding assistant on macOS.
 
-**Use case:** [Why they need it - e.g., "Need to automate deployment workflows", "Want to track inventory without complex software"]
+**Use case:** Need a complete, production-ready setup — not just "install and run", but security hardening, orphaned process cleanup, and a structured methodology for AI-assisted development.
+
+**Experience range:** Mixed — starts with beginner-friendly installation, gradually introduces advanced configuration (methodology, skills, hooks).
 
 ---
 
 ## Core Problem
 
-[What pain point are we solving? 2-3 sentences describing the problem this project addresses]
+Qwen Code CLI installs quickly but ships with no safety rails. Running in YOLO mode (no confirmations) speeds up work but risks destructive commands. Node processes from CLI agents (Qwen, Claude, Codex) accumulate and crash the system. The AI development methodology that makes agents effective (quick-learning, skill-master) exists only in Claude Code's ecosystem and needs manual adaptation for Qwen.
 
-[Example format: "Currently users have to [manual process]. This is slow/error-prone/expensive because [reason]. We solve this by [solution approach]."]
+We solve this by providing a single setup script, protective hooks, a cross-platform process cleaner, and pre-configured methodology skills — all documented step by step.
 
 ---
 
 ## Key Features
 
-[List 3-5 core capabilities - only the most important ones. Details belong in project backlog.]
-
-- **[Feature 1 name]** - [What it does in 1 sentence]
-- **[Feature 2 name]** - [What it does in 1 sentence]
-- **[Feature 3 name]** - [What it does in 1 sentence]
-- **[Feature 4 name]** - [What it does in 1 sentence]
-- **[Feature 5 name]** - [What it does in 1 sentence]
-
-<!--
-Feature backlog, detailed roadmap, and development phases live in the project backlog
-(see CLAUDE.md for backlog path), not here. This file is a stable overview.
--->
+- **Automated setup** - One script (`setup-qwen.sh`) installs and configures everything on macOS
+- **Security hooks** - YOLO mode with PreToolUse hooks blocking destructive commands (rm -rf, force push, writes outside project)
+- **Agent Cleaner** - Python daemon (launchd) that auto-kills orphaned node processes when RAM exceeds threshold
+- **Methodology adaptation** - Quick-learning and skill-master skills ported from Claude Code to Qwen Code
+- **User profiling** - 6 onboarding questions (role, code experience, product goals, activity domain, communication style, language) saved to QWEN.md global memory so the agent adapts its tone and explanations
+- **Modular documentation** - Separate guides for each topic, usable independently
 
 ---
 
 ## Out of Scope
 
-[What we explicitly DON'T do - helps agents avoid scope creep]
-
-- [Thing 1 we don't support - e.g., "No mobile app version"]
-- [Thing 2 we don't support - e.g., "No multi-tenant support"]
-- [Thing 3 we don't support - e.g., "No real-time collaboration features"]
-
-<!-- Add more items as needed -->
+- Windows/Linux installation guides (macOS only for now)
+- Porting all 59 Claude Code skills (only methodology core: methodology, quick-learning, skill-master)
+- Building a GUI or web interface
+- Qwen Code plugin/extension development
+- CI/CD pipeline setup for user projects
