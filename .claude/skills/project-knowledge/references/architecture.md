@@ -11,7 +11,7 @@ Technical architecture overview for AI agents. Helps agents understand HOW the s
 - **Why:** Native on macOS, no extra dependencies for shell scripts. Python for process management (psutil).
 
 **CLI tool:** Qwen Code (`@qwen-code/qwen-code` npm package, CLI binary: `qwen`)
-- **Why:** Free AI coding agent with 1000+ requests/day, open-source, Claude Code-compatible feature set.
+- **Why:** AI coding agent, free via OpenRouter (qwen3-coder model), open-source, Claude Code-compatible feature set.
 - **Install methods:** npm, Homebrew (`brew install qwen-code`), or quick install script.
 
 **Node.js:** v20+ (required by Qwen Code)

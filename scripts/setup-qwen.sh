@@ -20,7 +20,7 @@ step() { echo -e "\n${YELLOW}=== $1 ===${NC}"; }
 
 # ─── Step 1: Node.js ────────────────────────────────────────
 
-step "Шаг 1/6: Node.js"
+step "Шаг 1/7: Node.js"
 
 install_node() {
     if command -v brew &>/dev/null; then
@@ -79,7 +79,7 @@ fi
 
 # ─── Step 2: Qwen Code ──────────────────────────────────────
 
-step "Шаг 2/6: Qwen Code"
+step "Шаг 2/7: Qwen Code"
 
 if command -v qwen &>/dev/null; then
     ok "Qwen Code уже установлен ($(qwen --version 2>/dev/null || echo 'version unknown'))"
@@ -92,11 +92,54 @@ else
     ok "Qwen Code установлен"
 fi
 
-# ─── Step 3: User Profile ───────────────────────────────────
+# ─── Step 3: OpenRouter API Key ──────────────────────────────
 
-step "Шаг 3/6: Профиль пользователя"
+step "Шаг 3/7: API-ключ (OpenRouter)"
 
 mkdir -p "$QWEN_DIR"
+QWEN_ENV="$QWEN_DIR/.env"
+
+if [ -f "$QWEN_ENV" ] && grep -q "OPENAI_API_KEY" "$QWEN_ENV"; then
+    ok "API-ключ уже настроен"
+else
+    echo ""
+    echo "Qwen Code работает через OpenRouter — бесплатный сервис с моделями Qwen."
+    echo ""
+    echo "Чтобы получить ключ:"
+    echo "  1. Открой https://openrouter.ai и зарегистрируйся (Google или email)"
+    echo "  2. Перейди в Keys: https://openrouter.ai/settings/keys"
+    echo "  3. Нажми 'Create Key' и скопируй ключ (начинается с sk-or-v1-...)"
+    echo ""
+    read -rp "Вставь API-ключ: " OR_KEY
+
+    if [ -z "$OR_KEY" ]; then
+        warn "Ключ не введён. Настроишь позже вручную в ~/.qwen/.env"
+    else
+        cat > "$QWEN_ENV" << ENVEOF
+OPENAI_API_KEY=$OR_KEY
+OPENAI_BASE_URL=https://openrouter.ai/api/v1
+ENVEOF
+        ok "API-ключ сохранён в $QWEN_ENV"
+    fi
+
+    # Set default model to qwen3-coder (free)
+    SETTINGS_FILE="$QWEN_DIR/settings.json"
+    if [ -f "$SETTINGS_FILE" ]; then
+        python3 -c "
+import json
+with open('$SETTINGS_FILE') as f:
+    s = json.load(f)
+s.setdefault('model', {})['name'] = 'qwen/qwen3-coder:free'
+s.setdefault('security', {}).setdefault('auth', {})['selectedType'] = 'openai'
+with open('$SETTINGS_FILE', 'w') as f:
+    json.dump(s, f, indent=2, ensure_ascii=False)
+" 2>/dev/null && ok "Модель: qwen/qwen3-coder:free (бесплатная)"
+    fi
+fi
+
+# ─── Step 4: User Profile ───────────────────────────────────
+
+step "Шаг 4/7: Профиль пользователя"
 QWEN_MD="$QWEN_DIR/QWEN.md"
 
 if [ -f "$QWEN_MD" ] && grep -q "## User Profile" "$QWEN_MD"; then
@@ -180,13 +223,13 @@ fi
 
 # ─── Step 4: Safety Hooks ───────────────────────────────────
 
-step "Шаг 4/6: Безопасность"
+step "Шаг 5/7: Безопасность"
 
 bash "$SCRIPT_DIR/install-hooks.sh"
 
 # ─── Step 5: Agent Cleaner ──────────────────────────────────
 
-step "Шаг 5/6: Agent Cleaner"
+step "Шаг 6/7: Agent Cleaner"
 
 CLEANER_PATH="$HOME/agent_cleaner.py"
 CLEANER_LOG="$HOME/agent_cleaner.log"
@@ -214,7 +257,7 @@ ok "Agent Cleaner запущен (проверяет каждые 60 сек)"
 
 # ─── Step 6: Methodology Skills ─────────────────────────────
 
-step "Шаг 6/6: Навыки (Skills)"
+step "Шаг 7/7: Навыки (Skills)"
 
 SKILLS_DIR="$QWEN_DIR/skills"
 mkdir -p "$SKILLS_DIR"
