@@ -36,21 +36,23 @@ install_node() {
         else
             NODE_URL="https://nodejs.org/dist/v22.15.0/node-v22.15.0-darwin-x64.tar.gz"
         fi
-        NODE_TMP="/tmp/node-install"
-        rm -rf "$NODE_TMP"
-        mkdir -p "$NODE_TMP"
+        NODE_DIR="$HOME/.node"
+        rm -rf "$NODE_DIR"
+        mkdir -p "$NODE_DIR"
         echo "Скачиваю Node.js v22 ($ARCH)... (~45MB, подожди 1-2 минуты)"
-        curl -fL --progress-bar "$NODE_URL" | tar xz -C "$NODE_TMP" --strip-components=1
-        # Install to /usr/local (requires sudo on some systems)
-        echo "Устанавливаю в /usr/local/ (может потребоваться пароль)..."
-        sudo cp -R "$NODE_TMP"/bin/* /usr/local/bin/ 2>/dev/null || cp -R "$NODE_TMP"/bin/* /usr/local/bin/
-        sudo cp -R "$NODE_TMP"/lib/* /usr/local/lib/ 2>/dev/null || cp -R "$NODE_TMP"/lib/* /usr/local/lib/
-        sudo cp -R "$NODE_TMP"/include/* /usr/local/include/ 2>/dev/null || cp -R "$NODE_TMP"/include/* /usr/local/include/
-        sudo cp -R "$NODE_TMP"/share/* /usr/local/share/ 2>/dev/null || cp -R "$NODE_TMP"/share/* /usr/local/share/
-        rm -rf "$NODE_TMP"
+        curl -fL --progress-bar "$NODE_URL" | tar xz -C "$NODE_DIR" --strip-components=1
+        # Add to PATH for current session
+        export PATH="$NODE_DIR/bin:$PATH"
+        # Add to shell profile for future sessions
+        SHELL_RC="$HOME/.zshrc"
+        if ! grep -q '.node/bin' "$SHELL_RC" 2>/dev/null; then
+            echo '' >> "$SHELL_RC"
+            echo '# Node.js (installed by qwen-setup)' >> "$SHELL_RC"
+            echo 'export PATH="$HOME/.node/bin:$PATH"' >> "$SHELL_RC"
+        fi
         # Verify
         if command -v node &>/dev/null; then
-            ok "Node.js $(node --version) установлен"
+            ok "Node.js $(node --version) установлен в $NODE_DIR"
         else
             fail "Не удалось установить Node.js. Скачай вручную: https://nodejs.org/"
         fi
@@ -78,13 +80,11 @@ step "Шаг 2/6: Qwen Code"
 if command -v qwen &>/dev/null; then
     ok "Qwen Code уже установлен ($(qwen --version 2>/dev/null || echo 'version unknown'))"
     echo "Обновляю до последней версии..."
-    npm install -g @qwen-code/qwen-code@latest 2>/dev/null || \
-        sudo npm install -g @qwen-code/qwen-code@latest
+    npm install -g @qwen-code/qwen-code@latest
     ok "Qwen Code обновлён"
 else
     echo "Устанавливаю Qwen Code..."
-    npm install -g @qwen-code/qwen-code@latest 2>/dev/null || \
-        sudo npm install -g @qwen-code/qwen-code@latest
+    npm install -g @qwen-code/qwen-code@latest
     ok "Qwen Code установлен"
 fi
 
