@@ -39,8 +39,8 @@ install_node() {
         NODE_TMP="/tmp/node-install"
         rm -rf "$NODE_TMP"
         mkdir -p "$NODE_TMP"
-        echo "Скачиваю Node.js v22 ($ARCH)..."
-        curl -fsSL "$NODE_URL" | tar xz -C "$NODE_TMP" --strip-components=1
+        echo "Скачиваю Node.js v22 ($ARCH)... (~45MB, подожди 1-2 минуты)"
+        curl -fL --progress-bar "$NODE_URL" | tar xz -C "$NODE_TMP" --strip-components=1
         # Install to /usr/local (requires sudo on some systems)
         echo "Устанавливаю в /usr/local/ (может потребоваться пароль)..."
         sudo cp -R "$NODE_TMP"/bin/* /usr/local/bin/ 2>/dev/null || cp -R "$NODE_TMP"/bin/* /usr/local/bin/
