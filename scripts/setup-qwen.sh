@@ -134,7 +134,7 @@ else
     else
         # Write OpenRouter provider config directly into settings.json
         python3 - "$SETTINGS_FILE" "$OR_KEY" << 'PYEOF'
-import json, sys
+import json, sys, os
 
 settings_path = sys.argv[1]
 api_key = sys.argv[2]
@@ -150,18 +150,24 @@ s.setdefault('modelProviders', {})['openai'] = [{
     "id": "openrouter",
     "name": "OpenRouter",
     "baseUrl": "https://openrouter.ai/api/v1",
-    "envKey": "OPENROUTER_API_KEY"
+    "envKey": "OPENAI_API_KEY"
 }]
 
-# Set auth type and model
+# Set auth type
 s.setdefault('security', {}).setdefault('auth', {})['selectedType'] = 'openai'
+
+# Set model name
 s.setdefault('model', {})['name'] = 'qwen/qwen3-coder:free'
 
-# Save API key to .env
-import os
+# Save API key to .env as OPENAI_API_KEY (what envKey references)
 env_path = os.path.join(os.path.dirname(settings_path), '.env')
+env_lines = []
+if os.path.exists(env_path):
+    with open(env_path) as f:
+        env_lines = [l for l in f.readlines() if not l.startswith('OPENAI_API_KEY=') and not l.startswith('OPENAI_BASE_URL=') and not l.startswith('OPENROUTER_API_KEY=')]
+env_lines.append(f'OPENAI_API_KEY={api_key}\n')
 with open(env_path, 'w') as f:
-    f.write(f'OPENROUTER_API_KEY={api_key}\n')
+    f.writelines(env_lines)
 
 with open(settings_path, 'w') as f:
     json.dump(s, f, indent=2, ensure_ascii=False)
