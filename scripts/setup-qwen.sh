@@ -99,8 +99,25 @@ step "Шаг 3/7: API-ключ (OpenRouter)"
 mkdir -p "$QWEN_DIR"
 QWEN_ENV="$QWEN_DIR/.env"
 
-if [ -f "$QWEN_ENV" ] && grep -q "OPENAI_API_KEY" "$QWEN_ENV"; then
-    ok "API-ключ уже настроен"
+SETTINGS_FILE="$QWEN_DIR/settings.json"
+
+# Check if OpenRouter is already configured in settings.json
+ALREADY_CONFIGURED=false
+if [ -f "$SETTINGS_FILE" ]; then
+    python3 -c "
+import json, sys
+with open(sys.argv[1]) as f:
+    s = json.load(f)
+providers = s.get('modelProviders', {}).get('openai', [])
+for p in providers:
+    if 'openrouter' in p.get('baseUrl', ''):
+        sys.exit(0)
+sys.exit(1)
+" "$SETTINGS_FILE" 2>/dev/null && ALREADY_CONFIGURED=true
+fi
+
+if [ "$ALREADY_CONFIGURED" = true ]; then
+    ok "OpenRouter уже настроен"
 else
     echo ""
     echo "Qwen Code работает через OpenRouter — бесплатный сервис с моделями Qwen."
@@ -113,27 +130,44 @@ else
     read -rp "Вставь API-ключ: " OR_KEY
 
     if [ -z "$OR_KEY" ]; then
-        warn "Ключ не введён. Настроишь позже вручную в ~/.qwen/.env"
+        warn "Ключ не введён. Настроишь позже вручную."
     else
-        cat > "$QWEN_ENV" << ENVEOF
-OPENAI_API_KEY=$OR_KEY
-OPENAI_BASE_URL=https://openrouter.ai/api/v1
-ENVEOF
-        ok "API-ключ сохранён в $QWEN_ENV"
-    fi
+        # Write OpenRouter provider config directly into settings.json
+        python3 - "$SETTINGS_FILE" "$OR_KEY" << 'PYEOF'
+import json, sys
 
-    # Set default model to qwen3-coder (free)
-    SETTINGS_FILE="$QWEN_DIR/settings.json"
-    if [ -f "$SETTINGS_FILE" ]; then
-        python3 -c "
-import json
-with open('$SETTINGS_FILE') as f:
-    s = json.load(f)
-s.setdefault('model', {})['name'] = 'qwen/qwen3-coder:free'
+settings_path = sys.argv[1]
+api_key = sys.argv[2]
+
+try:
+    with open(settings_path) as f:
+        s = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    s = {}
+
+# Add OpenRouter as model provider
+s.setdefault('modelProviders', {})['openai'] = [{
+    "id": "openrouter",
+    "name": "OpenRouter",
+    "baseUrl": "https://openrouter.ai/api/v1",
+    "envKey": "OPENROUTER_API_KEY"
+}]
+
+# Set auth type and model
 s.setdefault('security', {}).setdefault('auth', {})['selectedType'] = 'openai'
-with open('$SETTINGS_FILE', 'w') as f:
+s.setdefault('model', {})['name'] = 'qwen/qwen3-coder:free'
+
+# Save API key to .env
+import os
+env_path = os.path.join(os.path.dirname(settings_path), '.env')
+with open(env_path, 'w') as f:
+    f.write(f'OPENROUTER_API_KEY={api_key}\n')
+
+with open(settings_path, 'w') as f:
     json.dump(s, f, indent=2, ensure_ascii=False)
-" 2>/dev/null && ok "Модель: qwen/qwen3-coder:free (бесплатная)"
+PYEOF
+        ok "OpenRouter настроен в settings.json"
+        ok "Модель: qwen/qwen3-coder:free (бесплатная)"
     fi
 fi
 
