@@ -22,6 +22,41 @@ step() { echo -e "\n${YELLOW}=== $1 ===${NC}"; }
 
 step "Шаг 1/6: Node.js"
 
+install_node() {
+    if command -v brew &>/dev/null; then
+        echo "Устанавливаю через Homebrew..."
+        brew install node@22
+        ok "Node.js установлен через Homebrew"
+    else
+        echo "Homebrew не найден. Скачиваю Node.js напрямую..."
+        # Detect architecture
+        ARCH=$(uname -m)
+        if [ "$ARCH" = "arm64" ]; then
+            NODE_URL="https://nodejs.org/dist/v22.15.0/node-v22.15.0-darwin-arm64.tar.gz"
+        else
+            NODE_URL="https://nodejs.org/dist/v22.15.0/node-v22.15.0-darwin-x64.tar.gz"
+        fi
+        NODE_TMP="/tmp/node-install"
+        rm -rf "$NODE_TMP"
+        mkdir -p "$NODE_TMP"
+        echo "Скачиваю Node.js v22 ($ARCH)..."
+        curl -fsSL "$NODE_URL" | tar xz -C "$NODE_TMP" --strip-components=1
+        # Install to /usr/local (requires sudo on some systems)
+        echo "Устанавливаю в /usr/local/ (может потребоваться пароль)..."
+        sudo cp -R "$NODE_TMP"/bin/* /usr/local/bin/ 2>/dev/null || cp -R "$NODE_TMP"/bin/* /usr/local/bin/
+        sudo cp -R "$NODE_TMP"/lib/* /usr/local/lib/ 2>/dev/null || cp -R "$NODE_TMP"/lib/* /usr/local/lib/
+        sudo cp -R "$NODE_TMP"/include/* /usr/local/include/ 2>/dev/null || cp -R "$NODE_TMP"/include/* /usr/local/include/
+        sudo cp -R "$NODE_TMP"/share/* /usr/local/share/ 2>/dev/null || cp -R "$NODE_TMP"/share/* /usr/local/share/
+        rm -rf "$NODE_TMP"
+        # Verify
+        if command -v node &>/dev/null; then
+            ok "Node.js $(node --version) установлен"
+        else
+            fail "Не удалось установить Node.js. Скачай вручную: https://nodejs.org/"
+        fi
+    fi
+}
+
 if command -v node &>/dev/null; then
     NODE_VER=$(node --version)
     NODE_MAJOR=$(echo "$NODE_VER" | sed 's/v\([0-9]*\).*/\1/')
@@ -29,22 +64,11 @@ if command -v node &>/dev/null; then
         ok "Node.js $NODE_VER уже установлен"
     else
         warn "Node.js $NODE_VER слишком старый (нужен v20+)"
-        if command -v brew &>/dev/null; then
-            echo "Обновляю через Homebrew..."
-            brew install node@22
-            ok "Node.js обновлён"
-        else
-            fail "Установи Node.js v20+ вручную: https://nodejs.org/"
-        fi
+        install_node
     fi
 else
     echo "Node.js не найден. Устанавливаю..."
-    if command -v brew &>/dev/null; then
-        brew install node@22
-        ok "Node.js установлен через Homebrew"
-    else
-        fail "Установи Node.js вручную: https://nodejs.org/ (нужен v20+)"
-    fi
+    install_node
 fi
 
 # ─── Step 2: Qwen Code ──────────────────────────────────────
