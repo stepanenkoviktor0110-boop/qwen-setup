@@ -4,7 +4,11 @@
 
 ## Быстрая установка
 
-Открой **Терминал** (нажми `Cmd + Пробел`, напиши **Terminal**, нажми Enter) и вставь эти 3 строки:
+Открой **Терминал** (нажми `Cmd + Пробел`, напиши **Terminal**, нажми Enter).
+
+Если при вставке появляются символы `^[[200~` — сначала выполни `printf '\e[?2004l'` и нажми Enter.
+
+Затем вставь эти 3 строки:
 
 ```bash
 curl -L https://github.com/stepanenkoviktor0110-boop/qwen-setup/archive/refs/heads/dev.tar.gz | tar xz
