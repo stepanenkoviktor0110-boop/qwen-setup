@@ -129,33 +129,22 @@ else
         *)   LANG_TEXT="$LANG" ;;
     esac
 
-    # Write to QWEN.md
+    # Write to QWEN.md (using printf to safely handle special chars in user input)
+    PROFILE_BLOCK="
+## User Profile
+
+- **Роль:** ${ROLE}
+- **Опыт с кодом:** ${CODE_EXP_TEXT}
+- **Цели:** ${GOALS}
+- **Сфера:** ${DOMAIN}
+- **Стиль общения:** ${STYLE_TEXT}
+- **Язык:** ${LANG_TEXT}"
+
     if [ -f "$QWEN_MD" ]; then
-        # Append profile to existing file
-        cat >> "$QWEN_MD" << PROFILE
-
-## User Profile
-
-- **Роль:** $ROLE
-- **Опыт с кодом:** $CODE_EXP_TEXT
-- **Цели:** $GOALS
-- **Сфера:** $DOMAIN
-- **Стиль общения:** $STYLE_TEXT
-- **Язык:** $LANG_TEXT
-PROFILE
+        printf '%s\n' "$PROFILE_BLOCK" >> "$QWEN_MD"
     else
-        cat > "$QWEN_MD" << PROFILE
-# Global Instructions
-
-## User Profile
-
-- **Роль:** $ROLE
-- **Опыт с кодом:** $CODE_EXP_TEXT
-- **Цели:** $GOALS
-- **Сфера:** $DOMAIN
-- **Стиль общения:** $STYLE_TEXT
-- **Язык:** $LANG_TEXT
-PROFILE
+        printf '%s\n' "# Global Instructions" > "$QWEN_MD"
+        printf '%s\n' "$PROFILE_BLOCK" >> "$QWEN_MD"
     fi
 
     ok "Профиль сохранён в $QWEN_MD"

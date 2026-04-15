@@ -25,13 +25,16 @@ SETTINGS_FILE="$QWEN_DIR/settings.json"
 if [ -f "$SETTINGS_FILE" ]; then
     # Settings exist — merge our config with existing
     # Use python3 to merge JSON (available on all macOS)
-    python3 -c "
+    python3 - "$SETTINGS_FILE" "$REPO_DIR/configs/settings.json" << 'PYEOF'
 import json, sys
 
-with open('$SETTINGS_FILE') as f:
+settings_path = sys.argv[1]
+new_config_path = sys.argv[2]
+
+with open(settings_path) as f:
     existing = json.load(f)
 
-with open('$REPO_DIR/configs/settings.json') as f:
+with open(new_config_path) as f:
     new = json.load(f)
 
 # Merge permissions: extend allow/deny lists, don't replace
@@ -42,17 +45,27 @@ for key in ['allow', 'deny', 'ask']:
             if item not in existing['permissions'][key]:
                 existing['permissions'][key].append(item)
 
-# Merge hooks: add our hooks
+# Merge hooks: add our hooks (with deduplication by command)
 for event in new.get('hooks', {}):
     existing.setdefault('hooks', {}).setdefault(event, [])
-    existing['hooks'][event].extend(new['hooks'][event])
+    existing_commands = set()
+    for hook_group in existing['hooks'][event]:
+        for h in hook_group.get('hooks', []):
+            existing_commands.add(h.get('command', ''))
+    for new_group in new['hooks'][event]:
+        has_new = False
+        for h in new_group.get('hooks', []):
+            if h.get('command', '') not in existing_commands:
+                has_new = True
+        if has_new:
+            existing['hooks'][event].append(new_group)
 
 # Set approval mode
 existing.setdefault('tools', {})['approvalMode'] = new.get('tools', {}).get('approvalMode', 'yolo')
 
-with open('$SETTINGS_FILE', 'w') as f:
+with open(settings_path, 'w') as f:
     json.dump(existing, f, indent=2, ensure_ascii=False)
-"
+PYEOF
     echo "✓ Settings merged into $SETTINGS_FILE"
 else
     # No existing settings — copy ours

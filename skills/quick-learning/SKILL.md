@@ -65,7 +65,7 @@ Read [entry-format.md](references/entry-format.md) for format, rules, and triad-
 Count unadapted triads: search `| — |$` in triad-index.md (use `$` anchor — middle columns also contain `| — |`).
 
 Show: `Quick Learning: {1 sentence summary, or "Clean session, no signals detected."}`
-If count ≥ 25: append "Накопилось {N} необработанных триад — запусти /skill-trainer."
+If count ≥ 25: append "Накопилось {N} необработанных триад — запусти /skill-master."
 
 ## Self-Verification
 
@@ -76,4 +76,4 @@ If count ≥ 25: append "Накопилось {N} необработанных �
 - [ ] Similarity check: search-first, no full index read unless matches found
 - [ ] No duplicates — existing patterns got Seen++
 - [ ] Max 2 entries, Adapted: — set on all new
-- [ ] Summary shown; if ≥25 unadapted → notify about /skill-trainer
+- [ ] Summary shown; if ≥25 unadapted → notify about /skill-master

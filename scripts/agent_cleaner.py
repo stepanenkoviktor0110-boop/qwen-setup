@@ -6,7 +6,6 @@ Kills node processes where: system RAM > threshold, parent is dead, age > minimu
 """
 
 import os
-import sys
 import time
 import signal
 import platform

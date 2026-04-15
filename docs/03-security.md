@@ -47,7 +47,7 @@ chmod +x ~/.qwen/hooks/block-dangerous.sh
 nano ~/.qwen/settings.json
 ```
 
-Вставь или добавь:
+Вставь или добавь (полная версия — в `configs/settings.json` в репозитории):
 
 ```json
 {
@@ -55,15 +55,35 @@ nano ~/.qwen/settings.json
     "approvalMode": "yolo"
   },
   "permissions": {
+    "allow": [
+      "read_file",
+      "glob",
+      "grep_search",
+      "list_directory",
+      "edit",
+      "write_file",
+      "run_shell_command(git *)",
+      "run_shell_command(npm *)",
+      "run_shell_command(node *)",
+      "run_shell_command(python3 *)",
+      "web_fetch",
+      "web_search",
+      "save_memory"
+    ],
     "deny": [
       "run_shell_command(rm -rf /)",
       "run_shell_command(rm -rf /*)",
+      "run_shell_command(rm -rf ~)",
+      "run_shell_command(rm -rf ~/*)",
       "run_shell_command(sudo rm -rf *)",
       "run_shell_command(git push --force*)",
       "run_shell_command(git reset --hard*)",
       "run_shell_command(shutdown *)",
       "run_shell_command(reboot *)",
-      "run_shell_command(killall *)"
+      "run_shell_command(killall *)",
+      "run_shell_command(defaults write *)",
+      "run_shell_command(curl * | bash)",
+      "run_shell_command(curl * | sh)"
     ]
   },
   "hooks": {
