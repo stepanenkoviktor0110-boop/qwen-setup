@@ -59,7 +59,7 @@ install_node() {
     fi
 }
 
-if command -v node &>/dev/null; then
+if command -v node &>/dev/null && command -v npm &>/dev/null; then
     NODE_VER=$(node --version)
     NODE_MAJOR=$(echo "$NODE_VER" | sed 's/v\([0-9]*\).*/\1/')
     if [ "$NODE_MAJOR" -ge 20 ]; then
@@ -69,7 +69,11 @@ if command -v node &>/dev/null; then
         install_node
     fi
 else
-    echo "Node.js не найден. Устанавливаю..."
+    if command -v node &>/dev/null && ! command -v npm &>/dev/null; then
+        warn "Node.js найден, но npm отсутствует. Переустанавливаю..."
+    else
+        echo "Node.js не найден. Устанавливаю..."
+    fi
     install_node
 fi
 
