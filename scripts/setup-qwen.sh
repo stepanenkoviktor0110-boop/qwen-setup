@@ -110,7 +110,7 @@ with open(sys.argv[1]) as f:
     s = json.load(f)
 providers = s.get('modelProviders', {}).get('openai', [])
 for p in providers:
-    if 'openrouter' in p.get('baseUrl', ''):
+    if 'openrouter' in p.get('baseUrl', '') and 'qwen' in p.get('id', ''):
         sys.exit(0)
 sys.exit(1)
 " "$SETTINGS_FILE" 2>/dev/null && ALREADY_CONFIGURED=true
@@ -145,18 +145,16 @@ try:
 except (FileNotFoundError, json.JSONDecodeError):
     s = {}
 
-# Add OpenRouter as model provider
+# Add OpenRouter as model provider (id = model name sent to API)
 s.setdefault('modelProviders', {})['openai'] = [{
-    "id": "openrouter",
-    "name": "OpenRouter",
+    "id": "qwen/qwen3-coder:free",
+    "name": "OpenRouter (Qwen3 Coder)",
     "baseUrl": "https://openrouter.ai/api/v1",
     "envKey": "OPENAI_API_KEY"
 }]
 
-# Set auth type
+# Set auth type and model
 s.setdefault('security', {}).setdefault('auth', {})['selectedType'] = 'openai'
-
-# Set model name
 s.setdefault('model', {})['name'] = 'qwen/qwen3-coder:free'
 
 # Save API key to .env as OPENAI_API_KEY (what envKey references)
