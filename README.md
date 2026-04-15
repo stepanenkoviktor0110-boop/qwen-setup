@@ -18,8 +18,10 @@ Qwen Code устанавливается за минуту, но без наст
 
 ## Быстрый старт
 
+Открой Терминал на Mac и вставь:
+
 ```bash
-git clone https://github.com/stepanenkoviktor0110-boop/qwen-setup.git
-cd qwen-setup
+curl -L https://github.com/stepanenkoviktor0110-boop/qwen-setup/archive/refs/heads/dev.tar.gz | tar xz
+cd qwen-setup-dev
 bash scripts/setup-qwen.sh
 ```
